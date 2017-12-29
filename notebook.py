@@ -4,6 +4,7 @@ import os
 import time
 import threading
 import html
+import uuid
 from bokeh.embed import components as bokeh_components
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
@@ -15,6 +16,7 @@ class Notebook:
         '/notebook.js': 'html/notebook.js'
     }
     _DYNAMIC_PATH = '/dynamic.html'
+    _OPEN_WEBPAGE_SECONDS = 1
     _FINAL_SHUTDOWN_SECONDS = 1
 
     def __init__(self):
@@ -73,7 +75,7 @@ class Notebook:
     def _wrap_args(self, tag, args, classes=[]):
         """Esacapes and wraps the text in an html tag."""
         escaped_text = html.escape(' '.join(str(arg) for arg in args)) \
-            .replace('\n', '<br/>')
+            .replace(' ', '&nbsp;').replace('\n', '<br/>')
         tag_class = ''
         if classes:
             tag_class = ' class="%s"' % ' '.join(classes)
@@ -83,6 +85,7 @@ class Notebook:
     def open_webpage(self):
         """Opens the webpage for this notebook using 'open' the command line."""
         os.system(f'open http://{Notebook._IP}:{Notebook._PORT}')
+        time.sleep(Notebook._OPEN_WEBPAGE_SECONDS)
 
     def text(self, *args):
         """Renders out plain text in a fixed width font."""
@@ -96,3 +99,17 @@ class Notebook:
     def plot(self, p):
         """Adds a Bokeh plot to the notebook."""
         self._dynamic_elts.append('\n'.join(bokeh_components(p)))
+
+    def data_frame(self, df):
+        """Render a Pandas dataframe as html."""
+        id = f'dataframe-{uuid.uuid4()}'
+        classes = 'table display' # table-striped table-hover table-sm table-bordered'
+        pandas_table = '<table border="1" class="dataframe">'
+        notebook_table = \
+            f'<table id="{id}" class="{classes}" cellspacing="0" width="100%">'
+        table_html = df.to_html(bold_rows=False) \
+            .replace(pandas_table, notebook_table)
+        table_script = f'<script>notebook.style_data_frame("{id}");</script>'
+        # self._dynamic_elts.append(
+        #     f'<div class="table-responsive">{the_html}</div>')
+        self._dynamic_elts.append(f'{table_html}\n{table_script}')
