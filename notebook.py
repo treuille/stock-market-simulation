@@ -40,18 +40,20 @@ class Notebook:
         self._httpd = \
             HTTPServer((Notebook._IP, Notebook._PORT), NotebookHandler)
 
-    def __enter__(self):
-        # run the webserver and display the results
+        # run the webserver
         threading.Thread(target=self._run_server).start()
         print('Started server at http://%s:%s' % (Notebook._IP, Notebook._PORT))
+
+    def __enter__(self):
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exception_type, exception_value, traceback):
+        print('in exit')
+        self.close()
+
+    def __del__(self):
         """Destructor closes down the webserver."""
-        self._keep_running = False
-        time.sleep(Notebook._FINAL_SHUTDOWN_SECONDS)
-        self._httpd.server_close()
-        print('Closed down server.')
+        self.close()
 
     def _run_server(self):
         self._keep_running = True
@@ -87,3 +89,13 @@ class Notebook:
         """Renders out text as an h4 header."""
         # self._wrap_args('div', '\n')
         self._wrap_args('h4', args, classes=['mt-3'])
+
+    def close(self):
+        """Shut down the server."""
+        if self._keep_running:
+            time.sleep(Notebook._FINAL_SHUTDOWN_SECONDS)
+            self._httpd.server_close()
+            print('Closed down server.')
+        else:
+            print('Sever already closed.')
+        self._keep_running = False
