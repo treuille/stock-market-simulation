@@ -10,20 +10,27 @@
 
   // Run this when the page loads.
   $(document).ready(() => {
-    let innerHtml = ""
+    const POLL_MILLISECONDS = 100.0
+    let previous_result = ""
     console.log('Starting load loop.')
 
-    $.ajax('dynamic.html')
-    .done((result) => {
-      console.log('Success');
-      console.log(result);
-    })
-    .fail(( xhr, status, errorThrown ) => {
-      console.log( "Sorry, there was a problem!" );
-      console.log( "Error: " + errorThrown );
-      console.log( "Status: " + status );
-      console.dir( xhr );
-    });
+    setInterval(() => {
+      console.log('Polling');
+
+      $.ajax('dynamic.html')
+      .done((result) => {
+        if (result != previous_result) {
+          console.log('The previous result changed.')
+          $('.dynamic-html-container').html(result);
+        } else {
+          console.log("The previous result didn't change.");
+        }
+        previous_result = result
+      })
+      .fail(( xhr, status, errorThrown ) => {
+        console.log( "Sorry, there was a problem! " + errorThrown + " " + status);
+      });
+    }, POLL_MILLISECONDS);
 
     const invk = (v) => v * 2;
     console.log(invk(1233));

@@ -3,6 +3,7 @@
 import os
 import time
 import threading
+import html
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 class Notebook:
@@ -21,6 +22,9 @@ class Notebook:
         for http_path, resource_path in Notebook._STATIC_PATHS.items():
             with open(resource_path) as data:
                 self._static_resources[http_path] = bytes(data.read(), 'utf-8')
+
+        # this is the list of dynamic html elements
+        self._dynamic_elts = []
 
         # create the webserver
         class NotebookHandler(BaseHTTPRequestHandler):
@@ -74,6 +78,22 @@ class Notebook:
         if path in Notebook._STATIC_PATHS:
             return self._static_resources[path]
         elif path == Notebook._DYNAMIC_PATH:
-            return bytes('Not yet implemented!', 'utf-8')
+            return bytes('<div class="w-100"></div>'.join(
+                '<div class="col mb-2">%s</div>' % elt
+                    for elt in self._dynamic_elts), 'utf-8')
         else:
             return None
+
+    def _wrap_args(self, tag, args):
+        """Esacapes and wraps the text in an html tag."""
+        escaped_text = html.escape(' '.join(str(arg) for arg in args)) \
+            .replace('\n', '<br/>')
+        self._dynamic_elts.append('<%s>%s</%s>' % (tag, escaped_text, tag))
+
+    def text(self, *args):
+        """Renders out plain text in a fixed width font."""
+        self._wrap_args('samp', args)
+
+    def header(self, *args):
+        """Renders out text as an h4 header."""
+        self._wrap_args('h4', args)
