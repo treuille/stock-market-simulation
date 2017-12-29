@@ -1,58 +1,31 @@
 import notebook
 
 with notebook.Notebook() as out:
-    print('Created notebook.')
-    print('Sleeping 10 seconds.')
-    import time
-    out.header('Interations:')
-    for x in range(5):
-        time.sleep(1)
-        out.text('iteration:', x)
-    out.header('Finished iterations:')
-    out.text('final_iteration\nwhat about this?\n...and this?')
+    import numpy as np
+    from bokeh import plotting
 
-# from bokeh import plotting
-# import numpy as np
-# from numpy import random
-# import math
-#
-# # prepare some data`
-# N = 4000
-# width = 1000
-# xs = np.arange(0, 10, 0.25)
-# y1 = np.sin(xs)
-# y2 = np.cos(xs)
-#
-# # output to static HTML file
-# plotting.output_file("lines.html")
-#
-# # create a new plot with a title and axis labels
-# tools = 'crosshair,pan,wheel_zoom,box_zoom,reset,box_select,lasso_select'
-# fig1 = plotting.figure(
-#     tools=tools,
-#     title=None,
-#     x_axis_label='x',
-#     y_axis_label='y')
-# fig1.triangle(xs, y1,
-#     size=10,
-#     fill_color='blue',
-#     fill_alpha=0.6,
-#     line_color=None)
-#
-# # create a new plot with a title and axis labels
-# tools = 'crosshair,pan,wheel_zoom,box_zoom,reset,box_select,lasso_select'
-# fig2 = plotting.figure(
-#     tools=tools,
-#     title=None,
-#     x_axis_label='x',
-#     y_axis_label='y')
-# fig2.square(xs, y2,
-#     size=10,
-#     fill_color='red',
-#     fill_alpha=0.6,
-#     line_color=None)
-#
-# p = plotting.gridplot([[fig1], [fig2]])
-#
-# # show the results
-# plotting.show(p)
+    # import figure, output_file, show
+
+    out.header('A Test plot...')
+
+    out.text('Creating some random data...')
+
+    # prepare some data
+    N = 4000
+    x = np.random.random(size=N) * 100
+    y = np.random.random(size=N) * 100
+    radii = np.random.random(size=N) * 1.5
+    colors = [
+        "#%02x%02x%02x" % (int(r), int(g), 150) for r, g in zip(50+2*x, 30+2*y)
+    ]
+
+    out.text('Creating the plot random data...')
+
+    # create a new plot with the tools above, and explicit ranges
+    TOOLS="crosshair,pan,wheel_zoom,box_zoom,reset,box_select,lasso_select"
+    p = plotting.figure(tools=TOOLS, x_range=(0,100), y_range=(0,100))
+    p.circle(x,y, radius=radii, fill_color=colors, fill_alpha=0.6, line_color=None)
+
+    out.text('Showing the plot...')
+    out.plot(p)
+    out.text('The plot has been shown.')

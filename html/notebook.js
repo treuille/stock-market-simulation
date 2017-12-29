@@ -18,7 +18,7 @@
         }
         previous_result = result
       })
-      .fail(( xhr, status, errorThrown ) => {
+      .fail((xhr, status, errorThrown) => {
         // Put in error handling code here.
       });
     }, POLL_MILLISECONDS);

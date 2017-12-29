@@ -4,6 +4,7 @@ import os
 import time
 import threading
 import html
+from bokeh.embed import components as bokeh_components
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 class Notebook:
@@ -79,6 +80,10 @@ class Notebook:
         self._dynamic_elts.append(
             f'<{tag}{tag_class}>{escaped_text}<{tag}>')
 
+    def open_webpage(self):
+        """Opens the webpage for this notebook using 'open' the command line."""
+        os.system(f'open http://{Notebook._IP}:{Notebook._PORT}')
+
     def text(self, *args):
         """Renders out plain text in a fixed width font."""
         self._wrap_args('samp', args)
@@ -87,3 +92,7 @@ class Notebook:
         """Renders out text as an h4 header."""
         # self._wrap_args('div', '\n')
         self._wrap_args('h4', args, classes=['mt-3'])
+
+    def plot(self, p):
+        """Adds a Bokeh plot to the notebook."""
+        self._dynamic_elts.append('\n'.join(bokeh_components(p)))
