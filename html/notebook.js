@@ -13,7 +13,7 @@
     let innerHtml = ""
     console.log('Starting load loop.')
 
-    $.ajax('file:///Users/adrien/Desktop/stock-market-simulation/output/nndinner.html')
+    $.ajax('dynamic.html')
     .done((result) => {
       console.log('Success');
       console.log(result);
