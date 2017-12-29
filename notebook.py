@@ -64,16 +64,20 @@ class Notebook:
             return self._static_resources[path]
         elif path == Notebook._DYNAMIC_PATH:
             return bytes('<div class="w-100"></div>'.join(
-                '<div class="col mb-2">%s</div>' % elt
+                f'<div class="col mb-2">{elt}</div>'
                     for elt in self._dynamic_elts), 'utf-8')
         else:
             return None
 
-    def _wrap_args(self, tag, args):
+    def _wrap_args(self, tag, args, classes=[]):
         """Esacapes and wraps the text in an html tag."""
         escaped_text = html.escape(' '.join(str(arg) for arg in args)) \
             .replace('\n', '<br/>')
-        self._dynamic_elts.append('<%s>%s</%s>' % (tag, escaped_text, tag))
+        tag_class = ''
+        if classes:
+            tag_class = ' class="%s"' % ' '.join(classes)
+        self._dynamic_elts.append(
+            f'<{tag}{tag_class}>{escaped_text}<{tag}>')
 
     def text(self, *args):
         """Renders out plain text in a fixed width font."""
@@ -81,5 +85,5 @@ class Notebook:
 
     def header(self, *args):
         """Renders out text as an h4 header."""
-        self._wrap_args('div', '\n')
-        self._wrap_args('h4', args)
+        # self._wrap_args('div', '\n')
+        self._wrap_args('h4', args, classes=['mt-3'])

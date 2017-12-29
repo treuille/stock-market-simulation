@@ -19,7 +19,7 @@
         previous_result = result
       })
       .fail(( xhr, status, errorThrown ) => {
-        console.log( "Sorry, there was a problem! " + errorThrown + " " + status);
+        // Put in error handling code here.
       });
     }, POLL_MILLISECONDS);
   });
