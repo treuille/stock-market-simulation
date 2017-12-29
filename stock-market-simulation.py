@@ -16,7 +16,7 @@ with notebook.Notebook() as out:
 # from numpy import random
 # import math
 #
-# # prepare some data
+# # prepare some data`
 # N = 4000
 # width = 1000
 # xs = np.arange(0, 10, 0.25)

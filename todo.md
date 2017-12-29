@@ -1,10 +1,6 @@
 ### Todo
 
 - create a little testbed for me to work on bokeh stuff
-  - output an html file
-    - put in some basic bootstrap stuff
-  - put in a code block (manually)
-    - see if I can get chrome to reload the way I want it to
   - put in a data table (manually)
   - put in a bokeh plot (manually)
 - see if I can write fixed/width fonts as I wanted to using code blocks
