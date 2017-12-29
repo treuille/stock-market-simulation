@@ -5,25 +5,16 @@
   'use strict';
 
   // Run this when the page loads.
-  function main() {
-  };
-
-  // Run this when the page loads.
   $(document).ready(() => {
     const POLL_MILLISECONDS = 100.0
+
+    // Loop continuously, polling for changes to dynamic.html.
     let previous_result = ""
-    console.log('Starting load loop.')
-
     setInterval(() => {
-      console.log('Polling');
-
       $.ajax('dynamic.html')
       .done((result) => {
         if (result != previous_result) {
-          console.log('The previous result changed.')
           $('.dynamic-html-container').html(result);
-        } else {
-          console.log("The previous result didn't change.");
         }
         previous_result = result
       })
@@ -31,9 +22,6 @@
         console.log( "Sorry, there was a problem! " + errorThrown + " " + status);
       });
     }, POLL_MILLISECONDS);
-
-    const invk = (v) => v * 2;
-    console.log(invk(1233));
   });
 
 })();

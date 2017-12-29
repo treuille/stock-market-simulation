@@ -7,8 +7,8 @@ import html
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 class Notebook:
+    _IP = '127.0.0.1'
     _PORT = 8314
-    # _STATIC_ROOT = 'html'
     _STATIC_PATHS = {
         '/': 'html/notebook.html',
         '/notebook.js': 'html/notebook.js'
@@ -29,49 +29,34 @@ class Notebook:
         # create the webserver
         class NotebookHandler(BaseHTTPRequestHandler):
             def do_GET(s):
-                print('do_GET:', s.path)
                 resource = self._get_resource(s.path)
                 if resource == None:
-                    print('Failing', s.path)
                     s.send_error(404)
                 else:
-                    print('Returning sucessfully', s.path)
-                    print(resource)
                     s.send_response(200)
                     s.send_header("Content-type", "text/html")
                     s.end_headers()
                     s.wfile.write(resource)
         self._httpd = \
-            HTTPServer(("127.0.0.1", Notebook._PORT), NotebookHandler)
+            HTTPServer((Notebook._IP, Notebook._PORT), NotebookHandler)
 
     def __enter__(self):
-        print('Created server', id(self._httpd))
-
         # run the webserver and display the results
         threading.Thread(target=self._run_server).start()
-        # threading.Thread(target=self.httpd.serve_forever).start()
+        print('Started server at http://%s:%s' % (Notebook._IP, Notebook._PORT))
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Destructor closes down the webserver."""
         self._keep_running = False
-        print('Closing the notepad.')
-        print('exc_type', exc_type)
-        print('exc_val', exc_val)
-        print('exc_tb', exc_tb)
-        # self._httpd.shutdown()
-        print('About to start sleeping.')
         time.sleep(Notebook._FINAL_SHUTDOWN_SECONDS)
-        print('Finished sleeping.')
         self._httpd.server_close()
-        print('The server is closed.')
+        print('Closed down server.')
 
     def _run_server(self):
         self._keep_running = True
-        print('About to start the server.')
         while self._keep_running:
             self._httpd.handle_request()
-        print('The server shutdown naturally.')
 
     def _get_resource(self, path):
         """Returns a static / dynamic resource, or none if path is invalid."""
@@ -96,4 +81,5 @@ class Notebook:
 
     def header(self, *args):
         """Renders out text as an h4 header."""
+        self._wrap_args('div', '\n')
         self._wrap_args('h4', args)
