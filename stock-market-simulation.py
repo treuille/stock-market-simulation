@@ -21,7 +21,6 @@ with notebook.Notebook() as out:
     out.data_frame(df)
     out.text('Here is some final text.')
 
-    #
     # out.text('Creating some random data...')
     #
     # # prepare some data

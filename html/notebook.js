@@ -30,11 +30,18 @@
     // Call this funtion style the rows and headers of a data table properly.
     style_data_frame: (id) => {
       console.log('styling', id);
-      $('#' + id).DataTable({
-        fixedHeader: true,
-        lengthChange: false,
-        pageLength: 5,
+      $(`#${id}`)
+      .addClass('display')
+      .css({fontFamily: 'monospace'})
+      .DataTable({
+        paging: false,
+        scrollY: 400,
+        scrollX: true,
+        searching: false,
       });
+
+      $(`#${id} td`)
+      .css({textAlign: 'right'})
     },
   };
 

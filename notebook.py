@@ -103,13 +103,9 @@ class Notebook:
     def data_frame(self, df):
         """Render a Pandas dataframe as html."""
         id = f'dataframe-{uuid.uuid4()}'
-        classes = 'table display' # table-striped table-hover table-sm table-bordered'
         pandas_table = '<table border="1" class="dataframe">'
-        notebook_table = \
-            f'<table id="{id}" class="{classes}" cellspacing="0" width="100%">'
+        notebook_table = f'<table id="{id}">'
         table_html = df.to_html(bold_rows=False) \
             .replace(pandas_table, notebook_table)
         table_script = f'<script>notebook.style_data_frame("{id}");</script>'
-        # self._dynamic_elts.append(
-        #     f'<div class="table-responsive">{the_html}</div>')
         self._dynamic_elts.append(f'{table_html}\n{table_script}')
