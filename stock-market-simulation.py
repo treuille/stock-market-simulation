@@ -17,6 +17,9 @@ with notebook.Notebook() as out:
         index=dates, columns=list(lowercase[:columns]))
     out.text(df)
 
+    import time
+    time.sleep(5)
+
     out.header('Using out.data_frame()')
     out.data_frame(df)
     out.text('Here is some final text.')

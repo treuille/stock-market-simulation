@@ -66,9 +66,12 @@ class Notebook:
         if path in Notebook._STATIC_PATHS:
             return self._static_resources[path]
         elif path == Notebook._DYNAMIC_PATH:
-            return bytes('<div class="w-100"></div>'.join(
+            elts = '<div class="w-100"></div>'.join(
                 f'<div class="col mb-2">{elt}</div>'
-                    for elt in self._dynamic_elts), 'utf-8')
+                    for elt in self._dynamic_elts)
+            # scroll_to_bottom = '<script>notebook.scroll_to_bottom()</script>'
+            # return bytes(f'{elts}{scroll_to_bottom}', 'utf-8')
+            return bytes(elts, 'utf-8')
         else:
             return None
 

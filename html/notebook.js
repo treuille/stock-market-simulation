@@ -12,17 +12,24 @@
       const POLL_MILLISECONDS = 100.0
 
       // Loop continuously, polling for changes to dynamic.html.
-      let previous_result = ""
+      let previousResult = "";
+      let scrolledToBottom = false;
       setInterval(() => {
         $.ajax('dynamic.html')
         .done((result) => {
-          if (result != previous_result) {
+          if (result != previousResult) {
             $('.dynamic-html-container').html(result);
+            scrolledToBottom = false;
+          } else if (!scrolledToBottom) {
+            notebook.scroll_to_bottom()
+            scrolledToBottom = true;
           }
-          previous_result = result
+          previousResult = result
         })
         .fail((xhr, status, errorThrown) => {
-          // Put in error handling code here.
+          if (!scrolledToBottom)
+            notebook.scroll_to_bottom()
+          scrolledToBottom = true;
         });
       }, POLL_MILLISECONDS);
     },
@@ -43,7 +50,18 @@
       $(`#${id} td`)
       .css({textAlign: 'right'})
     },
+
+    // Animate a scroll right down to the bottom.
+    scroll_to_bottom: () => {
+      setTimeout(() => {
+        $("html, body").animate({
+          scrollTop: $(document).height() }, 500);
+        console.log('Scrolled to bottom.');
+      }, 50);
+    },
   };
+
+
 
   // Run main when the page loads.
   $(document).ready(notebook.main);
