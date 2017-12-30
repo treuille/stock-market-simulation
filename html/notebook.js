@@ -36,18 +36,17 @@
 
     // Call this funtion style the rows and headers of a data table properly.
     styleDataFrame: (id) => {
-      // Turn on scrollX only when there are > 6 columns.
-      const numColumns = $(`#${id} tr`).first().children().length
-      const scrollX = numColumns > 7
-
       // Style the table.
+      const numRows = $(`#${id} tr`).length
+      const numColumns = $(`#${id} tr`).first().children().length
+      console.log(`rows=${numRows} cols=${numColumns}`)
       $(`#${id}`)
       .addClass('display')
       .css({fontFamily: 'monospace'})
       .DataTable({
         paging: false,
-        scrollY: true, // 400,
-        scrollX: scrollX,
+        scrollY: numRows > 10 ? 400 : true,
+        scrollX: numColumns > 7,
         searching: false,
       });
 

@@ -60,12 +60,9 @@ class Notebook:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Shut down the server."""
-        print(f'About to close the server after {Notebook._FINAL_SHUTDOWN_SECS / 2} seconds.')
         time.sleep(Notebook._FINAL_SHUTDOWN_SECS / 2)
         self._keep_running = False
-        print(f'Now really close after after {Notebook._FINAL_SHUTDOWN_SECS / 2} seconds.')
         time.sleep(Notebook._FINAL_SHUTDOWN_SECS / 2)
-        print(f'Now really closing.')
         self._httpd.server_close()
         print('Closed down server.')
 

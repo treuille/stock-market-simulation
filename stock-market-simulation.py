@@ -7,14 +7,13 @@ with notebook.Notebook() as out:
     out.header('Combining Pandas and Bokeh')
     out.text('Now to learn how to write tables using pandas...')
 
-    periods, columns = 50, 6
+    periods, columns = 3, 6
     dates = pd.date_range('20130101', periods=periods)
     from string import ascii_lowercase as lowercase
     df = pd.DataFrame(np.random.randn(periods, columns),
         index=dates, columns=list(lowercase[:columns]))
 
     # display the dataframe
-    out.text('Here is a dataframe.')
     out.data_frame(df)
 
     out.text('Describing the data')

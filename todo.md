@@ -1,8 +1,6 @@
 ### Todo
 
 - create a little testbed for me to work on bokeh stuff
-  - make it figure out whether to spawn a browser instance
-  - make it work when there are fewer than N rows
   - play around with multiindex
 - see if I can write fixed/width fonts as I wanted to using code blocks
 - see if I can figure out Pandas Dataframes using bokeh
