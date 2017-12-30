@@ -16,8 +16,8 @@ class Notebook:
         '/notebook.js': 'html/notebook.js'
     }
     _DYNAMIC_PATH = '/dynamic.html'
-    _OPEN_WEBPAGE_SECONDS = 1
-    _FINAL_SHUTDOWN_SECONDS = 1
+    _OPEN_WEBPAGE_SECS = 0.2
+    _FINAL_SHUTDOWN_SECS = 2.0
 
     def __init__(self):
         # load the template html
@@ -29,9 +29,13 @@ class Notebook:
         # this is the list of dynamic html elements
         self._dynamic_elts = []
 
+        # becomes true when we recieve our first get
+        self._received_get = False
+
         # create the webserver
         class NotebookHandler(BaseHTTPRequestHandler):
             def do_GET(s):
+                self._received_get = True
                 resource = self._get_resource(s.path)
                 if resource == None:
                     s.send_error(404)
@@ -44,15 +48,24 @@ class Notebook:
             HTTPServer((Notebook._IP, Notebook._PORT), NotebookHandler)
 
     def __enter__(self):
-        # run the webserver
+        # start the webserver
         threading.Thread(target=self._run_server).start()
+
+        # if no gets received after a timeout, then launch the browser
+        threading.Timer(Notebook._OPEN_WEBPAGE_SECS, self._open_webpage).start()
+
+        # all done
         print(f'Started server at http://{Notebook._IP}:{Notebook._PORT}')
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Shut down the server."""
+        print(f'About to close the server after {Notebook._FINAL_SHUTDOWN_SECS / 2} seconds.')
+        time.sleep(Notebook._FINAL_SHUTDOWN_SECS / 2)
         self._keep_running = False
-        time.sleep(Notebook._FINAL_SHUTDOWN_SECONDS)
+        print(f'Now really close after after {Notebook._FINAL_SHUTDOWN_SECS / 2} seconds.')
+        time.sleep(Notebook._FINAL_SHUTDOWN_SECS / 2)
+        print(f'Now really closing.')
         self._httpd.server_close()
         print('Closed down server.')
 
@@ -60,6 +73,14 @@ class Notebook:
         self._keep_running = True
         while self._keep_running:
             self._httpd.handle_request()
+
+    def _open_webpage(self):
+        """Opens the webpage for this notebook using 'open' the command line."""
+        if self._received_get:
+            print('Received get. Using previous webpage.')
+        else:
+            print('Opening new webpage.')
+            os.system(f'open http://{Notebook._IP}:{Notebook._PORT}')
 
     def _get_resource(self, path):
         """Returns a static / dynamic resource, or none if path is invalid."""
@@ -69,8 +90,6 @@ class Notebook:
             elts = '<div class="w-100"></div>'.join(
                 f'<div class="col mb-2">{elt}</div>'
                     for elt in self._dynamic_elts)
-            # scroll_to_bottom = '<script>notebook.scroll_to_bottom()</script>'
-            # return bytes(f'{elts}{scroll_to_bottom}', 'utf-8')
             return bytes(elts, 'utf-8')
         else:
             return None
@@ -84,11 +103,6 @@ class Notebook:
             tag_class = ' class="%s"' % ' '.join(classes)
         self._dynamic_elts.append(
             f'<{tag}{tag_class}>{escaped_text}<{tag}>')
-
-    def open_webpage(self):
-        """Opens the webpage for this notebook using 'open' the command line."""
-        os.system(f'open http://{Notebook._IP}:{Notebook._PORT}')
-        time.sleep(Notebook._OPEN_WEBPAGE_SECONDS)
 
     def text(self, *args):
         """Renders out plain text in a fixed width font."""
@@ -110,5 +124,5 @@ class Notebook:
         notebook_table = f'<table id="{id}">'
         table_html = df.to_html(bold_rows=False) \
             .replace(pandas_table, notebook_table)
-        table_script = f'<script>notebook.style_data_frame("{id}");</script>'
+        table_script = f'<script>notebook.styleDataFrame("{id}");</script>'
         self._dynamic_elts.append(f'{table_html}\n{table_script}')

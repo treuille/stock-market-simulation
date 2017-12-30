@@ -21,38 +21,43 @@
             $('.dynamic-html-container').html(result);
             scrolledToBottom = false;
           } else if (!scrolledToBottom) {
-            notebook.scroll_to_bottom()
+            notebook.scrollToBottom()
             scrolledToBottom = true;
           }
           previousResult = result
         })
         .fail((xhr, status, errorThrown) => {
           if (!scrolledToBottom)
-            notebook.scroll_to_bottom()
+            notebook.scrollToBottom()
           scrolledToBottom = true;
         });
       }, POLL_MILLISECONDS);
     },
 
     // Call this funtion style the rows and headers of a data table properly.
-    style_data_frame: (id) => {
-      console.log('styling', id);
+    styleDataFrame: (id) => {
+      // Turn on scrollX only when there are > 6 columns.
+      const numColumns = $(`#${id} tr`).first().children().length
+      const scrollX = numColumns > 7
+
+      // Style the table.
       $(`#${id}`)
       .addClass('display')
       .css({fontFamily: 'monospace'})
       .DataTable({
         paging: false,
-        scrollY: 400,
-        scrollX: true,
+        scrollY: true, // 400,
+        scrollX: scrollX,
         searching: false,
       });
 
+      // Style each cell.
       $(`#${id} td`)
       .css({textAlign: 'right'})
     },
 
     // Animate a scroll right down to the bottom.
-    scroll_to_bottom: () => {
+    scrollToBottom: () => {
       setTimeout(() => {
         $("html, body").animate({
           scrollTop: $(document).height() }, 500);
