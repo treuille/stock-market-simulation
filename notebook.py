@@ -17,7 +17,7 @@ class Notebook:
     }
     _DYNAMIC_PATH = '/dynamic.html'
     _OPEN_WEBPAGE_SECS = 0.2
-    _FINAL_SHUTDOWN_SECS = 2.0
+    _FINAL_SHUTDOWN_SECS = 4.0
 
     def __init__(self):
         # load the template html
