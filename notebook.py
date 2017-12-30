@@ -6,6 +6,8 @@ import threading
 import html
 import uuid
 import bokeh.embed
+import pandas as pd
+import traceback
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 class Notebook:
@@ -58,8 +60,17 @@ class Notebook:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Shut down the server."""
-        # Delay server shutdown if we haven't transmitted everything yet
+        # Display the stack trace if necessary.
+        if exc_type != None:
+            tb_list = traceback.format_list(traceback.extract_tb(exc_tb))
+            print('tb_list')
+            print('\n'.join(tb_list))
+            self.alert('\n'.join(tb_list))
+
+        # A small delay to flush anything left.
         time.sleep(Notebook._OPEN_WEBPAGE_SECS)
+
+        # Delay server shutdown if we haven't transmitted everything yet
         if self._n_transmitted_elts != len(self._dynamic_elts):
             print(f'Sleeping for {Notebook._FINAL_SHUTDOWN_SECS} '
                 'seconds to flush all elements.')
@@ -107,16 +118,20 @@ class Notebook:
 
     def header(self, *args):
         """Renders out text as an h4 header."""
-        # self._wrap_args('div', '\n')
         self._wrap_args('h4', args, classes=['mt-3'])
+
+    def alert(self, *args):
+        self._wrap_args('div', args, classes=['alert', 'alert-danger'])
 
     def plot(self, p):
         """Adds a Bokeh plot to the notebook."""
         plot_script, plot_html = bokeh.embed.components(p)
         self._dynamic_elts.append(plot_html + plot_script)
 
-    def data_frame(self, df):
+    def data(self, df):
         """Render a Pandas dataframe as html."""
+        if type(df) != pd.DataFrame:
+            df = pd.DataFrame(df)
         id = f'dataframe-{uuid.uuid4()}'
         pandas_table = '<table border="1" class="dataframe">'
         notebook_table = f'<table id="{id}">'
