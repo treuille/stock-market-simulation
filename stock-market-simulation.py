@@ -15,7 +15,7 @@ with notebook.Notebook() as out:
     out.header('Displaying the arrays:')
     df = pd.DataFrame(np.array([x, y, radii]).T, columns=['X', 'Y', 'radii'])
     df['colors'] = colors
-    out.data_frame(df)
+    out.data_frame(df.head())
 
     out.header('Summarizing some data:')
     out.data_frame(df.describe())

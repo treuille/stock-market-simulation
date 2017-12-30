@@ -5,7 +5,7 @@ import time
 import threading
 import html
 import uuid
-from bokeh.embed import components as bokeh_components
+import bokeh.embed
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 class Notebook:
@@ -17,7 +17,7 @@ class Notebook:
     }
     _DYNAMIC_PATH = '/dynamic.html'
     _OPEN_WEBPAGE_SECS = 0.2
-    _FINAL_SHUTDOWN_SECS = 4.0
+    _FINAL_SHUTDOWN_SECS = 3.0
 
     def __init__(self):
         # load the template html and javasript
@@ -59,6 +59,7 @@ class Notebook:
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Shut down the server."""
         # Delay server shutdown if we haven't transmitted everything yet
+        time.sleep(Notebook._OPEN_WEBPAGE_SECS)
         if self._n_transmitted_elts != len(self._dynamic_elts):
             print(f'Sleeping for {Notebook._FINAL_SHUTDOWN_SECS} '
                 'seconds to flush all elements.')
@@ -111,7 +112,8 @@ class Notebook:
 
     def plot(self, p):
         """Adds a Bokeh plot to the notebook."""
-        self._dynamic_elts.append('\n'.join(bokeh_components(p)))
+        plot_script, plot_html = bokeh.embed.components(p)
+        self._dynamic_elts.append(plot_html + plot_script)
 
     def data_frame(self, df):
         """Render a Pandas dataframe as html."""
@@ -121,4 +123,4 @@ class Notebook:
         table_html = df.to_html(bold_rows=False) \
             .replace(pandas_table, notebook_table)
         table_script = f'<script>notebook.styleDataFrame("{id}");</script>'
-        self._dynamic_elts.append(f'{table_html}\n{table_script}')
+        self._dynamic_elts.append(table_html + table_script)
