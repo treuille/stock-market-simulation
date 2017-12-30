@@ -15,15 +15,16 @@ with notebook.Notebook() as out:
     out.header('Displaying the arrays:')
     df = pd.DataFrame(np.array([x, y, radii]).T, columns=['X', 'Y', 'radii'])
     df['colors'] = colors
-    out.data_frame(df.head())
+    out.data_frame(df)
 
     out.header('Summarizing some data:')
     out.data_frame(df.describe())
 
     # create a new plot with the tools above, and explicit ranges
     out.header('Lets make a plot:')
-    TOOLS="crosshair,pan,wheel_zoom,box_zoom,reset,box_select,lasso_select"
-    p = plotting.figure(tools=TOOLS, x_range=(0,100), y_range=(0,100))
+
+    p = plotting.figure(tools='crosshair,pan,box_zoom,reset',
+        x_range=(0,100), y_range=(0,100))
     p.circle(x,y, radius=radii, fill_color=colors, fill_alpha=0.6, line_color=None)
 
     out.text('Showing the plot...')

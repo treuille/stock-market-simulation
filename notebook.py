@@ -20,28 +20,26 @@ class Notebook:
     _FINAL_SHUTDOWN_SECS = 4.0
 
     def __init__(self):
-        # load the template html
+        # load the template html and javasript
         self._static_resources = {}
         for http_path, resource_path in Notebook._STATIC_PATHS.items():
             with open(resource_path) as data:
                 self._static_resources[http_path] = bytes(data.read(), 'utf-8')
 
-        # this is the list of dynamic html elements
+        # This is the list of dynamic html elements.
         self._dynamic_elts = []
 
-        # becomes true when we recieve our first get
-        self._received_get = False
+        # Number of elements transmitted via GET. (None means no GET received.)
+        self._n_transmitted_elts = None
 
-        # create the webserver
+        # Create the webserver.
         class NotebookHandler(BaseHTTPRequestHandler):
             def do_GET(s):
-                self._received_get = True
                 resource = self._get_resource(s.path)
                 if resource == None:
                     s.send_error(404)
                 else:
                     s.send_response(200)
-                    s.send_header("Content-type", "text/html")
                     s.end_headers()
                     s.wfile.write(resource)
         self._httpd = \
@@ -60,9 +58,12 @@ class Notebook:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Shut down the server."""
-        time.sleep(Notebook._FINAL_SHUTDOWN_SECS / 2)
+        # Delay server shutdown if we haven't transmitted everything yet
+        if self._n_transmitted_elts != len(self._dynamic_elts):
+            print(f'Sleeping for {Notebook._FINAL_SHUTDOWN_SECS} '
+                'seconds to flush all elements.')
+            time.sleep(Notebook._FINAL_SHUTDOWN_SECS)
         self._keep_running = False
-        time.sleep(Notebook._FINAL_SHUTDOWN_SECS / 2)
         self._httpd.server_close()
         print('Closed down server.')
 
@@ -73,10 +74,7 @@ class Notebook:
 
     def _open_webpage(self):
         """Opens the webpage for this notebook using 'open' the command line."""
-        if self._received_get:
-            print('Received get. Using previous webpage.')
-        else:
-            print('Opening new webpage.')
+        if self._n_transmitted_elts == None:
             os.system(f'open http://{Notebook._IP}:{Notebook._PORT}')
 
     def _get_resource(self, path):
@@ -87,6 +85,7 @@ class Notebook:
             elts = '<div class="w-100"></div>'.join(
                 f'<div class="col mb-2">{elt}</div>'
                     for elt in self._dynamic_elts)
+            self._n_transmitted_elts = len(self._dynamic_elts)
             return bytes(elts, 'utf-8')
         else:
             return None
