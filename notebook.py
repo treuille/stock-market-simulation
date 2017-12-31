@@ -63,8 +63,7 @@ class Notebook:
         # Display the stack trace if necessary.
         if exc_type != None:
             tb_list = traceback.format_list(traceback.extract_tb(exc_tb))
-            print('tb_list')
-            print('\n'.join(tb_list))
+            tb_list.append(f'{exc_type.__name__}: {exc_val}')
             self.alert('\n'.join(tb_list))
 
         # A small delay to flush anything left.
