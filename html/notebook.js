@@ -39,7 +39,6 @@
       // Style the table.
       const numRows = $(`#${id} tr`).length
       const numColumns = $(`#${id} tr`).first().children().length
-      console.log(`rows=${numRows} cols=${numColumns}`)
       $(`#${id}`)
       .addClass('display')
       .css({fontFamily: 'monospace'})
@@ -60,7 +59,6 @@
       setTimeout(() => {
         $("html, body").animate({
           scrollTop: $(document).height() }, 500);
-        console.log('Scrolled to bottom.');
       }, 50);
     },
   };

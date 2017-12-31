@@ -107,10 +107,10 @@ class Notebook:
         else:
             return None
 
-    def _write_dom(self, tag, args, classes=[]):
+    def _write_dom(self, tag, args, spaces_become='&nbsp;', classes=[]):
         """Esacapes and wraps the text in an html tag."""
         escaped_text = html.escape(' '.join(str(arg) for arg in args)) \
-            .replace(' ', '&nbsp;').replace('\n', '<br/>')
+            .replace(' ', spaces_become).replace('\n', '<br/>')
         tag_class = ''
         if classes:
             tag_class = ' class="%s"' % ' '.join(classes)
@@ -154,14 +154,14 @@ class Notebook:
 
         The optional `fmt` argument can take on several values:
 
-            - `auto`   : figures out the
-            - `alert`  : formats the string as an alert
-            - `header` : formats the string as a header
-            - `info`   : prints out df.info() on a DataFrame-like object
+            - "auto"   : figures out the
+            - "alert"  : formats the string as an alert
+            - "header" : formats the string as a header
+            - "info"   : prints out df.info() on a DataFrame-like object
         """
         # These types are output specially.
-        dataframe_like_types = [pd.DataFrame, pd.Series, np.ndarray]
-        figure_like_types = [plotting.Figure]
+        dataframe_like_types = (pd.DataFrame, pd.Series, pd.Index, np.ndarray)
+        figure_like_types = (plotting.Figure,)
 
         # Dispatch based on the format argument.
         if fmt == 'auto':
@@ -171,17 +171,18 @@ class Notebook:
                     self._write_text(' '.join(string_buffer))
                 string_buffer[:] = []
             for arg in args:
-                if type(arg) in dataframe_like_types:
+                if isinstance(arg, dataframe_like_types):
                     flush_buffer()
                     self._write_data(arg)
-                elif type(arg) in figure_like_types:
+                elif isinstance(arg, figure_like_types):
                     flush_buffer()
                     self._write_plot(arg)
                 else:
                     string_buffer.append(str(arg))
             flush_buffer()
         elif fmt == 'alert':
-            self._write_dom('div', args, classes=['alert', 'alert-danger'])
+            self._write_dom('div', args, classes=['alert', 'alert-danger'],
+                spaces_become=' ')
         elif fmt == 'header':
             self._write_dom('h4', args, classes=['mt-3'])
         elif fmt == 'info':
