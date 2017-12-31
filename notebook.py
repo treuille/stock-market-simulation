@@ -1,13 +1,16 @@
 """Used to output data (tables, charts, and text) to a web browser."""
 
-import os
-import time
-import threading
-import html
-import uuid
 import bokeh.embed
+import html
+import numpy as np
+import os
 import pandas as pd
+import threading
+import time
 import traceback
+import uuid
+
+from bokeh import plotting
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 class Notebook:
@@ -49,14 +52,15 @@ class Notebook:
 
     def __enter__(self):
         # start the webserver
-        threading.Thread(target=self._run_server).start()
+        threading.Thread(target=self._run_server, daemon=True).start()
 
         # if no gets received after a timeout, then launch the browser
-        threading.Timer(Notebook._OPEN_WEBPAGE_SECS, self._open_webpage).start()
+        threading.Thread(target=self._open_webpage_as_needed,
+            daemon=True).start()
 
         # all done
         print(f'Started server at http://{Notebook._IP}:{Notebook._PORT}')
-        return self
+        return self.write
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Shut down the server."""
@@ -64,7 +68,7 @@ class Notebook:
         if exc_type != None:
             tb_list = traceback.format_list(traceback.extract_tb(exc_tb))
             tb_list.append(f'{exc_type.__name__}: {exc_val}')
-            self.alert('\n'.join(tb_list))
+            self.write('\n'.join(tb_list), fmt='alert')
 
         # A small delay to flush anything left.
         time.sleep(Notebook._OPEN_WEBPAGE_SECS)
@@ -83,8 +87,9 @@ class Notebook:
         while self._keep_running:
             self._httpd.handle_request()
 
-    def _open_webpage(self):
-        """Opens the webpage for this notebook using 'open' the command line."""
+    def _open_webpage_as_needed(self):
+        """If we've received no requests after a time, open a webpage."""
+        time.sleep(Notebook._OPEN_WEBPAGE_SECS)
         if self._n_transmitted_elts == None:
             os.system(f'open http://{Notebook._IP}:{Notebook._PORT}')
 
@@ -119,9 +124,6 @@ class Notebook:
         """Renders out text as an h4 header."""
         self._wrap_args('h4', args, classes=['mt-3'])
 
-    def alert(self, *args):
-        self._wrap_args('div', args, classes=['alert', 'alert-danger'])
-
     def plot(self, p):
         """Adds a Bokeh plot to the notebook."""
         plot_script, plot_html = bokeh.embed.components(p)
@@ -138,3 +140,67 @@ class Notebook:
             .replace(pandas_table, notebook_table)
         table_script = f'<script>notebook.styleDataFrame("{id}");</script>'
         self._dynamic_elts.append(table_html + table_script)
+
+    def write(self, *args, fmt='auto'):
+        """Writes it's arguments to notebook pages.
+
+        with Notebook() as print:
+            print('Hello world.')
+            print('This is an alert', fmt='alert')
+            print('This is a dataframe', pd.DataFrame([1, 2, 3]))
+
+        Supported types are:
+
+            - Bokeh figures.
+            - Pandas-DataFrame-like objects: DataFame, Series, and numpy.Array
+            - String-like objects: By default, objects are cast to strings.
+
+        The optional `fmt` argument can take on several values:
+
+            - `auto`   : figures out the
+            - `alert`  : formats the string as an alert
+            - `header` : formats the string as a header
+            - `info`   : prints out df.info() on a DataFrame-like object
+        """
+        # These types are output specially.
+
+        # Dispatch based on the format argument.
+        if fmt == 'auto':
+            dataframe_like_types = [pd.DataFrame, pd.Series, np.ndarray]
+            figure_like_types = [plotting.Figure]
+            string_buffer = []
+            def flush_buffer():
+                if string_buffer:
+                    self.text(' '.join(string_buffer))
+                string_buffer[:] = []
+            for arg in args:
+                if type(arg) in dataframe_like_types:
+                    flush_buffer()
+                    self.data(arg)
+                elif type(arg) in figure_like_types:
+                    flush_buffer
+                    self.plot(arg)
+                else:
+                    string_buffer.append(str(arg))
+            flush_buffer()
+        elif fmt == 'alert':
+            self._wrap_args('div', args, classes=['alert', 'alert-danger'])
+        else:
+            raise RuntimeError(f'fmt="{fmt}" not valid.')
+
+
+            # # Having any specially ouput types makes each arg a separate line.
+            # if any(type(x) in special_types for x in args):
+            #     self.text('We have some special types.')
+            #
+            # # Otherwise, consider all args strings and combine into one line.
+            # else:
+            #     self.text('All types can be cast to string.')
+            #     self.text(' '.join(str(x) for x in args))
+
+        #     # parse the arguments
+        #     def is_a_figure(x):
+        #          type(x) == plotting.Figure
+        #     def is_a_dataframe(x)
+        #      = lambda x: type(x) in []
+        # self.text(f'In call self={self} args={args} fmt={fmt}')
