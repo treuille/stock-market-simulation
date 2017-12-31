@@ -3,8 +3,40 @@ import numpy as np
 import pandas as pd
 from bokeh import plotting
 
-with notebook.Notebook() as print:
-    print.header('Playing with multiindices.')
+with notebook.Notebook() as out:
+    out.header('Playing with multiindices.')
+    smoothness = 100
+    df = pd.DataFrame(np.random.randn(500,2), columns=list('AB'))
+    out.data(df.describe())
+    df = pd.DataFrame({
+        'A': np.convolve([1.0 / smoothness] * smoothness, df.A),
+        'B': np.convolve([1.0 / smoothness] * smoothness, df.B)
+    })
+    out.data(df.describe())
+    out.data(df[:20])
+
+    fig = plotting.Figure(width=500)
+    fig.line(df.index, df.A, line_color='red')
+    fig.line(df.index, df.B, line_color='blue')
+    out.plot(fig)
+    out.text('All done!')
+
+    # print('Playing with multiindices.', fmt='header')
+    # smoothness = 100
+    # df = pd.DataFrame(np.random.randn(500,2), columns=list('AB'))
+    # print(df.describe())
+    # df = pd.DataFrame({
+    #     'A': np.convolve([1.0 / smoothness] * smoothness, df.A),
+    #     'B': np.convolve([1.0 / smoothness] * smoothness, df.B)
+    # })
+    # print(df.describe())
+    # print(df[:20])
+    #
+    # fig = plotting.Figure(width=500)
+    # fig.line(df.index, df.A, line_color='red')
+    # fig.line(df.index, df.B, line_color='blue')
+    # print(fig)
+
     # dates = pd.date_range('12/30/2017', periods=8)
     # df = pd.DataFrame(np.random.randn(8, 4), index=dates)
     # sa = pd.Series([1,2,3], index=list('abc'))
