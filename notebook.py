@@ -2,6 +2,7 @@
 
 import bokeh.embed
 import html
+import io
 import numpy as np
 import os
 import pandas as pd
@@ -114,15 +115,7 @@ class Notebook:
         if classes:
             tag_class = ' class="%s"' % ' '.join(classes)
         self._dynamic_elts.append(
-            f'<{tag}{tag_class}>{escaped_text}<{tag}>')
-
-    def text(self, *args):
-        """Renders out plain text in a fixed width font."""
-        self._wrap_args('samp', args)
-
-    def header(self, *args):
-        """Renders out text as an h4 header."""
-        self._wrap_args('h4', args, classes=['mt-3'])
+            f'<{tag}{tag_class}>{escaped_text}</{tag}>')
 
     def plot(self, p):
         """Adds a Bokeh plot to the notebook."""
@@ -163,15 +156,15 @@ class Notebook:
             - `info`   : prints out df.info() on a DataFrame-like object
         """
         # These types are output specially.
+        dataframe_like_types = [pd.DataFrame, pd.Series, np.ndarray]
+        figure_like_types = [plotting.Figure]
 
         # Dispatch based on the format argument.
         if fmt == 'auto':
-            dataframe_like_types = [pd.DataFrame, pd.Series, np.ndarray]
-            figure_like_types = [plotting.Figure]
             string_buffer = []
             def flush_buffer():
                 if string_buffer:
-                    self.text(' '.join(string_buffer))
+                    self._wrap_args('samp', (' '.join(string_buffer),))
                 string_buffer[:] = []
             for arg in args:
                 if type(arg) in dataframe_like_types:
@@ -185,22 +178,15 @@ class Notebook:
             flush_buffer()
         elif fmt == 'alert':
             self._wrap_args('div', args, classes=['alert', 'alert-danger'])
+        elif fmt == 'header':
+            self._wrap_args('h4', args, classes=['mt-3'])
+        elif fmt == 'info':
+            if len(args) != 1:
+                raise RuntimeError('fmt="info" only operates on one argument.')
+            if type(args[0]) not in dataframe_like_types:
+                raise RuntimeError('fmt="info" only operates on DataFrames.')
+            stream = io.StringIO()
+            args[0].info(buf=stream)
+            self._wrap_args('samp', (stream.getvalue(),))
         else:
             raise RuntimeError(f'fmt="{fmt}" not valid.')
-
-
-            # # Having any specially ouput types makes each arg a separate line.
-            # if any(type(x) in special_types for x in args):
-            #     self.text('We have some special types.')
-            #
-            # # Otherwise, consider all args strings and combine into one line.
-            # else:
-            #     self.text('All types can be cast to string.')
-            #     self.text(' '.join(str(x) for x in args))
-
-        #     # parse the arguments
-        #     def is_a_figure(x):
-        #          type(x) == plotting.Figure
-        #     def is_a_dataframe(x)
-        #      = lambda x: type(x) in []
-        # self.text(f'In call self={self} args={args} fmt={fmt}')

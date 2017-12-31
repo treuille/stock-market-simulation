@@ -4,11 +4,13 @@ import pandas as pd
 from bokeh import plotting
 
 with notebook.Notebook() as print:
-    # out.header('Playing with simplified transitions.')
+    print('Playing with simplified syntax.', fmt='header')
     df = pd.DataFrame(np.random.randn(500,2), columns=list('AB'))
-    print('Hello world.', 123, df, "Here's another exciting one!", df)
+    print('Hello world.', 123, 'abc', df)
     print('This is an alert.', fmt='alert')
-    raise RuntimeError('testing error handling')
+    print(df.describe())
+    print('And here is some info.')
+    print(df, fmt='info')
 
     # smoothness = 100
 
@@ -57,8 +59,5 @@ with notebook.Notebook() as print:
     # out.data(sa)
     # df.A = range(len(df.index))
     # out.data(df)
-    # import io
-    # stream = io.StringIO()
-    # df.info(buf=stream)
-    # out.text(stream.getvalue())
+
     # out.data(sa[:2])
