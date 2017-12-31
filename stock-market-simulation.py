@@ -4,29 +4,34 @@ import pandas as pd
 from bokeh import plotting
 
 with notebook.Notebook() as print:
-    print('Playing with simplified syntax.', fmt='header')
-    df = pd.DataFrame(np.random.randn(500,2), columns=list('AB'))
-    print('Hello world.', 123, 'abc', df)
-    print('This is an alert.', fmt='alert')
-    print(df.describe())
-    print('And here is some info.')
-    print(df, fmt='info')
+    print('Hello world.')
+    print('This is an alert', fmt='alert')
+    print('This is a dataframe', pd.DataFrame([1, 2, 3]))
 
+
+    # print('Playing with simplified syntax.', fmt='header')
+    # df = pd.DataFrame(np.random.randn(500,2), columns=list('AB'))
+    # print('Hello world.', 123, 'abc', df)
+    # print('This is an alert.', fmt='alert')
+    # print(df.describe())
+    # print('And here is some info.')
+    # print(df, fmt='info')
+    #
     # smoothness = 100
-
-    # out.data(df.describe())
+    # print(df.describe())
     # df = pd.DataFrame({
     #     'A': np.convolve([1.0 / smoothness] * smoothness, df.A),
     #     'B': np.convolve([1.0 / smoothness] * smoothness, df.B)
     # })
-    # out.data(df.describe())
-    # out.data(df[:20])
+    # print(df.describe())
+    # print(df[:20])
     #
     # fig = plotting.Figure(width=500)
     # fig.line(df.index, df.A, line_color='red')
     # fig.line(df.index, df.B, line_color='blue')
-    # out.plot(fig)
-    # out.text('All done!')
+    # print('This is the figure:', fig, 'All done!')
+
+    ### GOING THROUGH THE TUTORIAL ###
 
     # print('Playing with multiindices.', fmt='header')
     # smoothness = 100

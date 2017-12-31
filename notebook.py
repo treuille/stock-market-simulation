@@ -107,7 +107,7 @@ class Notebook:
         else:
             return None
 
-    def _wrap_args(self, tag, args, classes=[]):
+    def _write_dom(self, tag, args, classes=[]):
         """Esacapes and wraps the text in an html tag."""
         escaped_text = html.escape(' '.join(str(arg) for arg in args)) \
             .replace(' ', '&nbsp;').replace('\n', '<br/>')
@@ -117,12 +117,16 @@ class Notebook:
         self._dynamic_elts.append(
             f'<{tag}{tag_class}>{escaped_text}</{tag}>')
 
-    def plot(self, p):
+    def _write_text(self, text):
+        """Writes some text to the notebook."""
+        self._write_dom('samp', (text,))
+
+    def _write_plot(self, p):
         """Adds a Bokeh plot to the notebook."""
         plot_script, plot_html = bokeh.embed.components(p)
         self._dynamic_elts.append(plot_html + plot_script)
 
-    def data(self, df):
+    def _write_data(self, df):
         """Render a Pandas dataframe as html."""
         if type(df) != pd.DataFrame:
             df = pd.DataFrame(df)
@@ -164,22 +168,22 @@ class Notebook:
             string_buffer = []
             def flush_buffer():
                 if string_buffer:
-                    self._wrap_args('samp', (' '.join(string_buffer),))
+                    self._write_text(' '.join(string_buffer))
                 string_buffer[:] = []
             for arg in args:
                 if type(arg) in dataframe_like_types:
                     flush_buffer()
-                    self.data(arg)
+                    self._write_data(arg)
                 elif type(arg) in figure_like_types:
-                    flush_buffer
-                    self.plot(arg)
+                    flush_buffer()
+                    self._write_plot(arg)
                 else:
                     string_buffer.append(str(arg))
             flush_buffer()
         elif fmt == 'alert':
-            self._wrap_args('div', args, classes=['alert', 'alert-danger'])
+            self._write_dom('div', args, classes=['alert', 'alert-danger'])
         elif fmt == 'header':
-            self._wrap_args('h4', args, classes=['mt-3'])
+            self._write_dom('h4', args, classes=['mt-3'])
         elif fmt == 'info':
             if len(args) != 1:
                 raise RuntimeError('fmt="info" only operates on one argument.')
@@ -187,6 +191,6 @@ class Notebook:
                 raise RuntimeError('fmt="info" only operates on DataFrames.')
             stream = io.StringIO()
             args[0].info(buf=stream)
-            self._wrap_args('samp', (stream.getvalue(),))
+            self._write_text(stream.getvalue())
         else:
             raise RuntimeError(f'fmt="{fmt}" not valid.')
