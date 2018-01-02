@@ -39,6 +39,10 @@
       // Style the table.
       const numRows = $(`#${id} tr`).length
       const numColumns = $(`#${id} tr`).first().children().length
+      console.log(`styling dataframe id="${id}"`)
+      console.log(`numRows=${numRows} numColumns=${numColumns}`)
+      console.log(`scrollY=${numRows > 10 ? 400 : true}`)
+      console.log(`scrollX=${numColumns > 7}`)
       $(`#${id}`)
       .addClass('display')
       .css({fontFamily: 'monospace'})

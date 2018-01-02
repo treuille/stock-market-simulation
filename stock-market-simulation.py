@@ -4,40 +4,13 @@ import pandas as pd
 from bokeh import plotting
 
 with notebook.Notebook() as print:
-    # print('Learning about indices', fmt='header')
-    # dates = pd.date_range('12/31/2017', periods=8)
-    # df = pd.DataFrame(np.random.randn(8,4), index=dates, columns=list('ABCD'))
-    # print('dates:', dates)
-    # print('dataframe:', df)
-    # print('df.A and df.B', df[['A', 'B']])
-    #
-    # print('Reset first column.', fmt='header')
-    # df.A = range(len(df.index))
-    # print(df)
-    # print(df, fmt='info')
-    #
-    # print('Slicing some ranges...', fmt='header')
-    # print(df.B > 0, 'Only where B is positive:', df[df.B > 0])
-    #
-    # print('Getting a value directly', fmt='header')
-    # print(df.loc['1/4/2018', 'C'], type(df.loc['1/4/2018', 'C']))
-    #
-    # print('Looking at a row.', fmt='header')
-    # print(df.loc['1/4/2018'])
-    #
-    # print("Let's do some sampling...", fmt='header')
-    # print('n=3', df.sample(n=3))
-    # print('frac=0.5', df.sample(frac=0.5, replace=True))
+    print('Playing with timeseries', fmt='header')
+    dates = pd.date_range('1/1/2018', periods=365)
+    df = pd.DataFrame(np.random.randn(365), index=dates, columns=['deltas'])
+    df['cumsum'] = df.cumsum()
+    print(df)
 
-    n_elts = 10
-    import string
-    letters = pd.DataFrame(list(string.ascii_lowercase[:n_elts]), columns=['letters'])
-    letters['probabilities'] = np.arange(n_elts, dtype=np.float64) ** 2
-    letters['probabilities'] /= letters['probabilities'].sum()
-    print(letters, 'sum:', letters['probabilities'].sum())
-
-    samples = letters.sample(n=10000, replace=True, weights=letters.probabilities)
-    value_counts = (samples.letters.value_counts() / 10000.0) # .reindex(np.arange(n_elts))
-    print('value_counts', value_counts.values)
-    letters['empirical_probabilities'] = value_counts.values
-    print(letters)
+    fig = plotting.Figure()
+    fig.line(np.arange(10), np.arange(10), color='blue')
+    # fig.line(df.index.values, df['deltas'].values)
+    print('the figure:', fig)

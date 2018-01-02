@@ -133,7 +133,7 @@ class Notebook:
         id = f'dataframe-{uuid.uuid4()}'
         pandas_table = '<table border="1" class="dataframe">'
         notebook_table = f'<table id="{id}">'
-        table_html = df.to_html(bold_rows=False) \
+        table_html = df.to_html(bold_rows=False, sparsify=False) \
             .replace(pandas_table, notebook_table)
         table_script = f'<script>notebook.styleDataFrame("{id}");</script>'
         self._dynamic_elts.append(table_html + table_script)
@@ -188,10 +188,10 @@ class Notebook:
         elif fmt == 'info':
             if len(args) != 1:
                 raise RuntimeError('fmt="info" only operates on one argument.')
-            if type(args[0]) not in dataframe_like_types:
+            if not isinstance(args[0], dataframe_like_types):
                 raise RuntimeError('fmt="info" only operates on DataFrames.')
             stream = io.StringIO()
-            args[0].info(buf=stream)
+            pd.DataFrame(args[0]).info(buf=stream)
             self._write_text(stream.getvalue())
         else:
             raise RuntimeError(f'fmt="{fmt}" not valid.')
